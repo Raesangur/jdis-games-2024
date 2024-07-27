@@ -21,8 +21,10 @@ class MyBot:
     def __init__(self):
         self.name = "Bon Matin"
         self.old_position = None
+        self.old_player = None
         self.C_ALLOW_BLADE = False
         self.C_AGGRESSIVE = True
+        self.C_STUCK_ADJUST = False
         self.C_STUCK_HYSTERESIS = 5
         self.stuck = 0
         self.stuckCorner = (0, 0)
@@ -62,6 +64,10 @@ class MyBot:
         player = [p for p in game_state.players if p.name == "bon-matin"][0]
         print("Health: " + str(player.health) + "\t Position: " + str(player.pos))
         
+        if self.old_player and player.health > self.old_player.health:
+            print("---- NEW LIFE ----")
+            self.stuck = 0
+
         if False:
             # pathfinding
             pass
@@ -95,14 +101,14 @@ class MyBot:
                 actions.append(self.attack_blade(player, ennemy))
 
             # Attack with gun
-            else: # ennemyDist <= 15:
+            elif ennemyDist <= 20:
                 if player.playerWeapon != 1:
                     actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponCanon))
 
                 actions.append(self.attack_gun(player, ennemy))
 
             # Move
-            if self.stuck:
+            if self.stuck and self.C_STUCK_ADJUST:
                 actions.append(MoveAction(self.stuckCorner))
             else:
                 coin, coinDistance = self.find_closest_coin(player, game_state.coins)
@@ -111,7 +117,8 @@ class MyBot:
                 else:
                     actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
 
-                self.old_position = player.pos
+            self.old_position = player.pos
+            self.old_player = player
 
             return actions
 
