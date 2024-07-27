@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from queue import Queue
 
 from typing import List, Union
 
@@ -58,84 +59,81 @@ class MyBot:
         """
         print(f"Current tick: {game_state.current_tick}")
         player = [p for p in game_state.players if p.name == "bon-matin"][0]
-        print("Health: " + str(player.health))
+        print("Health: " + str(player.health) + "\t Position: " + str(player.pos))
+        
+        if False:
+            # pathfinding
+            pass
 
-        actions = []
-
-        if player.pos == self.old_position:
-            self.stuck = game_state.current_tick
-            print("Stuck!")
-            self.find_wall(player.pos, player.dest)
-            print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
-            self.choose_stuck_corner()
         else:
-            if (game_state.current_tick > self.stuck + self.C_STUCK_HYSTERESIS):
-                self.stuck = 0
+            actions = []
 
-        self.adjust_aggressiveness(game_state)
-
-        ennemy, ennemyDist = self.find_closest_player(player, game_state.players)
-
-        # Attack with Blade
-        if ennemyDist <= 2 and self.C_ALLOW_BLADE:
-            if player.playerWeapon != 2:
-                actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade))
-
-            actions.append(self.attack_blade(player, ennemy))
-
-        # Attack with gun
-        elif ennemyDist <= 15:
-            if player.playerWeapon != 1:
-                actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponCanon))
-
-            actions.append(self.attack_gun(player, ennemy))
-
-        # Move
-        if self.stuck:
-            actions.append(MoveAction(self.stuckCorner))
-        else:
-            coin, coinDistance = self.find_closest_coin(player, game_state.coins)
-            if self.C_AGGRESSIVE == False or coinDistance < 5:
-                actions.append(MoveAction((coin.pos.x, coin.pos.y)))
+            if player.pos == self.old_position:
+                self.stuck = game_state.current_tick
+                print("Stuck!")
+                self.find_wall(player.pos, player.dest)
+                print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
+                self.instructions = None
+                self.choose_stuck_corner()
             else:
-                actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
+                if (game_state.current_tick > self.stuck + self.C_STUCK_HYSTERESIS):
+                    self.stuck = 0
 
-        self.old_position = player.pos
-        return actions
-    
+            self.adjust_aggressiveness(game_state)
 
-    # def find_instructions():
+            ennemy, ennemyDist = self.find_closest_player(player, game_state.players)
+
+            # Attack with Blade
+            if ennemyDist <= 2 and self.C_ALLOW_BLADE:
+                if player.playerWeapon != 2:
+                    actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade))
+
+                actions.append(self.attack_blade(player, ennemy))
+
+            # Attack with gun
+            else: # ennemyDist <= 15:
+                if player.playerWeapon != 1:
+                    actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponCanon))
+
+                actions.append(self.attack_gun(player, ennemy))
+
+            # Move
+            if self.stuck:
+                actions.append(MoveAction(self.stuckCorner))
+            else:
+                coin, coinDistance = self.find_closest_coin(player, game_state.coins)
+                if self.C_AGGRESSIVE == False or coinDistance < 5:
+                    actions.append(MoveAction((coin.pos.x, coin.pos.y)))
+                else:
+                    actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
+
+                self.old_position = player.pos
+                return actions
 
 
+    def find_path(position, goal):
+        # BFS algorithm to find the shortest path
+        maze = self.wall_map
+        directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+        start = (position.x, position.y)
+        end = (goal.x, goal.y)
 
-    # def breadth_first_search(graph, start_node, end_node):
-    #     solution = []
-    #     costs = 0
+        visited = np.zeros_like(maze, dtype=bool)
+        visited[start] = True
+        queue = Queue()
+        queue.put((start, []))
 
-    #     frontier = []
-    #     visited = []
-
-    #     frontier.append(start_node)
-    #     visited.append(start_node)
-
-    #     while frontier:
-    #         selected_node = frontier.pop(0)
-
-    #         if selected_node == end_node:
-    #             solution.append(selected_node)
-    #             break
-            
-    #         solution.append(selected_node)
-
-    #         for neighbour in graph[selected_node]:
-    #             if neighbour not in visited:
-    #                 frontier.append(neighbour)
-    #                 visited.append(neighbour)
-
-    #         costs += 1
-
-    #     return solution, costs
-
+        while not queue.empty():
+            (node, path) = queue.get()
+            for dx, dy in directions:
+                next_node = (node[0]+dx, node[1]+dy)
+                if (next_node == end):
+                    return path + [next_node]
+                if (next_node[0] >= 0 and next_node[1] >= 0 and
+                    next_node[0] < maze.shape[0] and next_node[1] < maze.shape[1] and
+                    maze[next_node] == 0 and not visited[next_node]):
+                    visited[next_node] = True
+                    queue.put((next_node, path + [next_node]))
 
 
     def find_wall(self, position, destination):
@@ -270,6 +268,7 @@ class MyBot:
         self.__map_state = map_state
         self.old_position = None
         self.wall_map = np.zeros((100, 100), dtype=int)
+        self.instructions = None
 
 
     def on_end(self):
