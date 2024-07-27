@@ -17,7 +17,9 @@ class MyBot:
     name : str
     
     def __init__(self):
-        self.name = "Magellan"
+        self.name = "Bon Matin"
+        self.coinRank = 0
+        self.coinDistance = 10000
 
 
     def on_tick(self, game_state: GameState) -> List[Union[MoveAction, SwitchWeaponAction, RotateBladeAction, ShootAction, SaveAction]]:
@@ -127,6 +129,8 @@ class MyBot:
         """
         self.__map_state = map_state
         self.old_position = 0
+        self.coinRank = 0
+        self.coinDistance = 10000
         pass
 
 
