@@ -23,8 +23,8 @@ class MyBot:
         self.old_position = None
         self.old_player = None
         self.C_ALLOW_BLADE = False
-        self.C_AGGRESSIVE = True
-        self.C_STUCK_ADJUST = True
+        self.C_AGGRESSIVE = False
+        self.C_STUCK_ADJUST = False
         self.C_STUCK_HYSTERESIS = 5
         self.C_PATHFINDING = True
         self.stuck = 0
@@ -73,11 +73,17 @@ class MyBot:
 
         if player.pos == self.old_position:
             self.stuck = game_state.current_tick
-            print("Stuck!")
             self.find_wall(player.pos, player.dest)
-            print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
             self.instructions = None
             self.choose_stuck_corner()
+
+            print("STUCK!")
+            print(f"LISTE DE MUR : ")
+            for i in range(len(self.wall_map)):
+                for j in range(len(self.wall_map)):
+                    if self.wall_map[i][j] == 1:
+                        print(f"Wall à : {i}, {j}")
+
         else:
             if (game_state.current_tick > self.stuck + self.C_STUCK_HYSTERESIS):
                 self.stuck = 0
@@ -130,10 +136,11 @@ class MyBot:
         self.old_player = player
 
         if self.C_PATHFINDING:
-            print('NEXT INSTRUCTION')
             position = self.instructions.pop(0)
+            print(f'NEXT INSTRUCTION = {position[0]}, {position[1]}')
             actions.append(MoveAction((position[0], position[1])))
 
+        print(F"NOMBRE DE MUR {np.sum(self.wall_map)/5}")
         return actions
 
 
@@ -158,8 +165,16 @@ class MyBot:
 
             for dx, dy in directions:
                 next_node = (node[0]+dx, node[1]+dy)
+                # print(f'Node : {next_node[0]}, {next_node[1]}')
+
+                # if maze[next_node] == 1:
+                    # print(f'==================Node identifié comme mur : {next_node}')
+
                 if (next_node == end):
                     print('CHEMIN DE PATHFINDING TROUVÉ')
+                    if maze[next_node] == 1:
+                        print('LE GOAL EST UN MUR')
+                    print(path + [next_node])
                     return path + [next_node]
                 if (next_node[0] >= 0 and next_node[1] >= 0 and
                     next_node[0] < maze.shape[0] and next_node[1] < maze.shape[1] and
