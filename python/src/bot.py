@@ -63,9 +63,16 @@ class MyBot:
         
         if False:
             # pathfinding
-            pass
+            if self.instructions is None or len(self.instructions) == 0:
+                coin, coinDistance = self.find_closest_coin(player, game_state.coins)
+                goal = (coin.pos.x, coin.pos.y)
+                self.instructions = self.find_path(player.pos, goal)
 
-        else:
+            actions = []
+            position = self.instructions.pop(0)
+            actions.append(MoveAction((position[0], position[1])))
+
+        if True:
             actions = []
 
             if player.pos == self.old_position:
@@ -111,12 +118,15 @@ class MyBot:
                 return actions
 
 
-    def find_path(position, goal):
+    def find_path(self, position, goal):
         # BFS algorithm to find the shortest path
         maze = self.wall_map
         directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
-        start = (position.x, position.y)
-        end = (goal.x, goal.y)
+        start = (int(position.x), int(position.y))
+        end = (int(goal[0]), int(goal[1]))
+
+        print(f"Start : {start}")
+        print(f"Goal : {end}")
 
         visited = np.zeros_like(maze, dtype=bool)
         visited[start] = True
@@ -125,9 +135,12 @@ class MyBot:
 
         while not queue.empty():
             (node, path) = queue.get()
+            # print(f'Dans la while, node = {node}, path = {path}')
+
             for dx, dy in directions:
                 next_node = (node[0]+dx, node[1]+dy)
                 if (next_node == end):
+                    print('Mitsqueta')
                     return path + [next_node]
                 if (next_node[0] >= 0 and next_node[1] >= 0 and
                     next_node[0] < maze.shape[0] and next_node[1] < maze.shape[1] and
