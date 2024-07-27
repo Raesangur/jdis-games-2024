@@ -22,6 +22,9 @@ class MyBot:
         self.old_position = None
         self.C_ALLOW_BLADE = False
         self.C_AGGRESSIVE = True
+        self.C_STUCK_HYSTERESIS = 5
+        self.stuck = 0
+        self.stuckCorner = (0, 0)
 
 
     def on_tick(self, game_state: GameState) -> List[Union[MoveAction, SwitchWeaponAction, RotateBladeAction, ShootAction, SaveAction]]:
@@ -60,10 +63,14 @@ class MyBot:
         actions = []
 
         if player.pos == self.old_position:
+            self.stuck = game_state.current_tick
             print("Stuck!")
-            #self.find_wall(player.pos, player.dest)
-            #print(self.wall_map)
-            #octets = self.find_wall(player.pos, player.dest)
+            self.find_wall(player.pos, player.dest)
+            print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
+            self.choose_stuck_corner()
+        else:
+            if (game_state.current_tick > self.stuck + self.C_STUCK_HYSTERESIS):
+                self.stuck = 0
 
         self.adjust_aggressiveness(game_state)
 
@@ -84,20 +91,57 @@ class MyBot:
             actions.append(self.attack_gun(player, ennemy))
 
         # Move
-        if self.C_AGGRESSIVE == False:
-            coin = self.find_closest_coin(player, game_state.coins)
-            actions.append(MoveAction((coin.pos.x, coin.pos.y)))
+        if self.stuck:
+            actions.append(MoveAction(self.stuckCorner))
         else:
-            actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
+            coin, coinDistance = self.find_closest_coin(player, game_state.coins)
+            if self.C_AGGRESSIVE == False or coinDistance < 5:
+                actions.append(MoveAction((coin.pos.x, coin.pos.y)))
+            else:
+                actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
 
         self.old_position = player.pos
         return actions
     
 
+    # def find_instructions():
+
+
+
+    # def breadth_first_search(graph, start_node, end_node):
+    #     solution = []
+    #     costs = 0
+
+    #     frontier = []
+    #     visited = []
+
+    #     frontier.append(start_node)
+    #     visited.append(start_node)
+
+    #     while frontier:
+    #         selected_node = frontier.pop(0)
+
+    #         if selected_node == end_node:
+    #             solution.append(selected_node)
+    #             break
+            
+    #         solution.append(selected_node)
+
+    #         for neighbour in graph[selected_node]:
+    #             if neighbour not in visited:
+    #                 frontier.append(neighbour)
+    #                 visited.append(neighbour)
+
+    #         costs += 1
+
+    #     return solution, costs
+
+
+
     def find_wall(self, position, destination):
         if destination.y < position.y:
             # WALL UP
-            y = position.y - 1
+            y = int(position.y - 1)
             x_temp = position.x
 
             # valeur entre 0 et 19 car il y a 20 cell de 5 unité
@@ -109,15 +153,15 @@ class MyBot:
             x4 = x3+1
             x5 = x4+1
 
-            self.wall_map[x1][y] = 1
-            self.wall_map[x2][y] = 1
-            self.wall_map[x3][y] = 1
-            self.wall_map[x4][y] = 1
-            self.wall_map[x5][y] = 1
+            self.wall_map[int(x1)][y] = 1
+            self.wall_map[int(x2)][y] = 1
+            self.wall_map[int(x3)][y] = 1
+            self.wall_map[int(x4)][y] = 1
+            self.wall_map[int(x5)][y] = 1
 
         elif destination.y > position.y:
             # WALL DOWN
-            y = position.y + 1
+            y = int(position.y + 1)
             x_temp = position.x
 
             # valeur entre 0 et 19 car il y a 20 cell de 5 unité
@@ -129,15 +173,15 @@ class MyBot:
             x4 = x3+1
             x5 = x4+1
 
-            self.wall_map[x1][y] = 1
-            self.wall_map[x2][y] = 1
-            self.wall_map[x3][y] = 1
-            self.wall_map[x4][y] = 1
-            self.wall_map[x5][y] = 1
+            self.wall_map[int(x1)][y] = 1
+            self.wall_map[int(x2)][y] = 1
+            self.wall_map[int(x3)][y] = 1
+            self.wall_map[int(x4)][y] = 1
+            self.wall_map[int(x5)][y] = 1
             
         elif destination.x > position.x:
             # WALL RIGHT
-            x = position.x + 1
+            x = int(position.x + 1)
             y_temp = position.y
 
             # valeur entre 0 et 19 car il y a 20 cell de 5 unité
@@ -149,15 +193,15 @@ class MyBot:
             y4 = y3+1
             y5 = y4+1
 
-            self.wall_map[x][y1] = 1
-            self.wall_map[x][y2] = 1
-            self.wall_map[x][y3] = 1
-            self.wall_map[x][y4] = 1
-            self.wall_map[x][y5] = 1
+            self.wall_map[x][int(y1)] = 1
+            self.wall_map[x][int(y2)] = 1
+            self.wall_map[x][int(y3)] = 1
+            self.wall_map[x][int(y4)] = 1
+            self.wall_map[x][int(y5)] = 1
 
         else:
             # WALL LEFT
-            x = position.x - 1
+            x = int(position.x - 1)
             y_temp = position.y
 
             # valeur entre 0 et 19 car il y a 20 cell de 5 unité
@@ -169,11 +213,11 @@ class MyBot:
             y4 = y3+1
             y5 = y4+1
 
-            self.wall_map[x][y1] = 1
-            self.wall_map[x][y2] = 1
-            self.wall_map[x][y3] = 1
-            self.wall_map[x][y4] = 1
-            self.wall_map[x][y5] = 1
+            self.wall_map[x][int(y1)] = 1
+            self.wall_map[x][int(y2)] = 1
+            self.wall_map[x][int(y3)] = 1
+            self.wall_map[x][int(y4)] = 1
+            self.wall_map[x][int(y5)] = 1
 
 
     # def decompress_octets(self):
@@ -222,25 +266,13 @@ class MyBot:
         return ShootAction(currentPos.x + dx, currentPos.y + dy)
 
 
-
     def on_start(self, map_state: MapState):
-        """
-        (fr) Cette méthode est appelée une seule fois au début de la partie. Vous pouvez y définir des
-            actions à effectuer au début de la partie.
-
-        Arguments:
-            map_state (MapState): (fr) L'état de la carte.
-        """
         self.__map_state = map_state
         self.old_position = None
         self.wall_map = np.zeros((100, 100), dtype=int)
 
 
     def on_end(self):
-        """
-        (fr) Cette méthode est appelée une seule fois à la fin de la partie. Vous pouvez y définir des
-            actions à effectuer à la fin de la partie.
-        """
         pass
 
     def find_closest_coin(self, player, coins):
@@ -254,7 +286,7 @@ class MyBot:
                 bestCoin = coin
                 minDistance = distance
 
-        return bestCoin
+        return bestCoin, minDistance
 
     def find_closest_player(self, player, players):
         minDistance = 10000
@@ -285,4 +317,27 @@ class MyBot:
         return RotateBladeAction(math.atan2(dy, dx))
     
     def attack_gun(self, player, ennemy):
+        distance = [player.pos.x - ennemy.pos.x, player.pos.y - ennemy.pos.y]
+        norm = math.sqrt(distance[0] ** 2 + distance[1] ** 2)
+        direction = [distance[1] / norm, distance[0] / norm]
+        direction = [c * 15 for c in direction]
+
+        #return ShootAction(direction)
         return ShootAction((ennemy.pos.x, ennemy.pos.y))
+
+
+    def choose_stuck_corner(self):
+        if self.stuckCorner == (0, 0):
+            print("Going lower left")
+            self.stuckCorner = (0, self.__map_state.size)
+        elif self.stuckCorner == (0, self.__map_state.size):
+            print("Going lower right")
+            self.stuckCorner = (self.__map_state.size, self.__map_state.size)
+        elif self.stuckCorner == (self.__map_state.size, self.__map_state.size):
+            print("Going upper right")
+            self.stuckCorner = (self.__map_state.size, 0)
+        else:
+            print("Going upper left")
+            self.stuckCorner = (0, 0)
+
+        return self.stuckCorner
