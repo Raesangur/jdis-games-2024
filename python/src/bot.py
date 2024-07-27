@@ -19,8 +19,9 @@ class MyBot:
     
     def __init__(self):
         self.name = "Bon Matin"
-        self.old_position = 0
+        self.old_position = None
         self.C_ALLOW_BLADE = False
+        self.C_AGGRESSIVE = True
 
 
     def on_tick(self, game_state: GameState) -> List[Union[MoveAction, SwitchWeaponAction, RotateBladeAction, ShootAction, SaveAction]]:
@@ -58,20 +59,20 @@ class MyBot:
 
 
         if player.pos == self.old_position:
+            print("Stuck!")
             #octets = self.find_wall(player.pos, player.dest)
             pass
 
-        coin = self.find_closest_coin(player, game_state.coins)
+        if game_state.current_tick % 100 < 50:
+            self.C_AGGRESSIVE = True
+            print("Aggressive Mode")
+        else:
+            self.C_AGGRESSIVE = False
+            print("Discovery Mode")
 
-        actions = [
-            #SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade),
-            #RotateBladeAction((game_state.current_tick % 8) * math.pi / 4),
-            MoveAction((coin.pos.x, coin.pos.y)),
-        ]
+        actions = []
 
         ennemy, ennemyDist = self.find_closest_player(player, game_state.players) 
-
-
         if ennemyDist <= 2 and self.C_ALLOW_BLADE:
             if player.playerWeapon != 2:
                 actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade))
@@ -85,7 +86,12 @@ class MyBot:
 
             actions.append(ShootAction((ennemy.pos.x, ennemy.pos.y)))
 
-        
+        if self.C_AGGRESSIVE == False:
+            coin = self.find_closest_coin(player, game_state.coins)
+            actions.append(MoveAction((coin.pos.x, coin.pos.y)))
+        else:
+            actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
+
         self.old_position = player.pos
         return actions
     
@@ -234,7 +240,7 @@ class MyBot:
             map_state (MapState): (fr) L'état de la carte.
         """
         self.__map_state = map_state
-        self.old_position = 0
+        self.old_position = None
         pass
 
 
