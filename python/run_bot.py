@@ -13,7 +13,9 @@ def main():
     if args.rank:
         channel = "wss://jdis-ia.dinf.fsci.usherbrooke.ca:8087/echo"
     
-    Socket(channel, args.token).run()
+    token = "1a3e10d0-8664-4209-8018-938d9ddd199d"
+
+    Socket(channel, args.token if args.token else token).run()
 
 if __name__ == "__main__":
     main()
