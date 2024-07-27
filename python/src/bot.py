@@ -103,7 +103,8 @@ class MyBot:
             if self.stuck and self.C_STUCK_ADJUST:
                 print('ALLER VERS STUCK CORNER')
                 if self.C_PATHFINDING:
-                    goal = self.stuckCorner
+                    #goal = self.stuckCorner
+                    goal = (player.pos.x + 15, player.pos.y - 15)
                 else:
                     actions.append(MoveAction(self.stuckCorner))
             else:
@@ -364,16 +365,16 @@ class MyBot:
         return ShootAction((ennemy.pos.x, ennemy.pos.y))
 
 
-    def choose_stuck_corner(self):
+    def choose_stuck_corner(self, player):
         if self.stuckCorner == (0, 0):
             print("Going lower left")
-            self.stuckCorner = (0, self.__map_state.size)
-        elif self.stuckCorner == (0, self.__map_state.size):
+            self.stuckCorner = (0, 10000)
+        elif self.stuckCorner == (0, 10000):
             print("Going lower right")
-            self.stuckCorner = (self.__map_state.size, self.__map_state.size)
-        elif self.stuckCorner == (self.__map_state.size, self.__map_state.size):
+            self.stuckCorner = (10000, 10000)
+        elif self.stuckCorner == (10000, 10000):
             print("Going upper right")
-            self.stuckCorner = (self.__map_state.size, 0)
+            self.stuckCorner = (10000, 0)
         else:
             print("Going upper left")
             self.stuckCorner = (0, 0)
