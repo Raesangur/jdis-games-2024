@@ -26,7 +26,7 @@ class MyBot:
         self.C_AGGRESSIVE = True
         self.C_STUCK_ADJUST = True
         self.C_STUCK_HYSTERESIS = 5
-        self.C_PATHFINDING = False
+        self.C_PATHFINDING = True
         self.stuck = 0
         self.stuckCorner = (0, 0)
 
@@ -90,14 +90,12 @@ class MyBot:
         if ennemyDist <= 2 and self.C_ALLOW_BLADE:
             if player.playerWeapon != 2:
                 actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade))
-
             actions.append(self.attack_blade(player, ennemy))
 
         # Attack with gun
         elif ennemyDist <= 20:
             if player.playerWeapon != 1:
                 actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponCanon))
-
             actions.append(self.attack_gun(player, ennemy))
 
         # Move
@@ -110,11 +108,13 @@ class MyBot:
             else:
                 coin, coinDistance = self.find_closest_coin(player, game_state.coins)
                 if self.C_AGGRESSIVE == False or coinDistance < 5:
+                    print('ALLER VERS COIN')
                     if self.C_PATHFINDING:
                         goal = (coin.pos.x, coin.pos.y)
                     else:
                         actions.append(MoveAction((coin.pos.x, coin.pos.y)))
                 else:
+                    print('ALLER VERS ENNEMY')
                     if self.C_PATHFINDING:
                         goal = (ennemy.pos.x, ennemy.pos.y)
                     else:
