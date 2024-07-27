@@ -96,6 +96,7 @@ class MyBot:
                             (en) The state of the map.
         """
         self.__map_state = map_state
+        self.old_position = 0
         pass
 
 
