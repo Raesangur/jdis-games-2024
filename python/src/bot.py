@@ -184,6 +184,11 @@ class MyBot:
 
 
     def find_wall(self, position, destination):
+        position.x = int(position.x)
+        position.y = int(position.y)
+        destination.x = int(destination.x)
+        destination.y = int(destination.y)
+
         if destination.y < position.y:
             # WALL UP
             print('Wall up')
