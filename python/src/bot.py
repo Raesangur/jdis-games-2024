@@ -101,6 +101,7 @@ class MyBot:
         # Move
         if self.instructions == None or len(self.instructions) == 0:
             if self.stuck and self.C_STUCK_ADJUST:
+                print('ALLER VERS STUCK CORNER')
                 if self.C_PATHFINDING:
                     goal = self.stuckCorner
                 else:
@@ -156,7 +157,7 @@ class MyBot:
             for dx, dy in directions:
                 next_node = (node[0]+dx, node[1]+dy)
                 if (next_node == end):
-                    print('Mitsqueta')
+                    print('CHEMIN DE PATHFINDING TROUVÉ')
                     return path + [next_node]
                 if (next_node[0] >= 0 and next_node[1] >= 0 and
                     next_node[0] < maze.shape[0] and next_node[1] < maze.shape[1] and
