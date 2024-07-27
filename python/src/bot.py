@@ -336,9 +336,14 @@ class MyBot:
         return bestPlayer, minDistance
     
     def adjust_aggressiveness(self, game_state):
-        if game_state.current_tick % 100 < 50:
+        if game_state.current_round == 1:
+            self.C_AGGRESSIVE = False
+            print("Treasure Mode")
+
+        elif game_state.current_tick % 50 < 25:
             self.C_AGGRESSIVE = True
             print("Aggressive Mode")
+
         else:
             self.C_AGGRESSIVE = False
             print("Discovery Mode")
