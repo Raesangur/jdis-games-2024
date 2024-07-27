@@ -366,7 +366,7 @@ class MyBot:
         return ShootAction((ennemy.pos.x, ennemy.pos.y))
 
 
-    def choose_stuck_corner(self, player):
+    def choose_stuck_corner(self, player=None):
         if self.stuckCorner == (0, 0):
             print("Going lower left")
             self.stuckCorner = (0, 10000)
