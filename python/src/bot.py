@@ -20,13 +20,14 @@ class MyBot:
     
     def __init__(self):
         self.name = "Bon Matin"
-        self.old_position = None
-        self.old_player = None
-        self.C_ALLOW_BLADE = False
-        self.C_AGGRESSIVE = False
-        self.C_STUCK_ADJUST = False
-        self.C_STUCK_HYSTERESIS = 5
+        self.C_ALLOW_BLADE = True
+        self.C_AGGRESSIVE = True
+        self.C_STUCK_ADJUST = True
+        self.C_STUCK_HYSTERESIS = 10
         self.C_PATHFINDING = True
+
+        self.old_player = None
+        self.old_ennemy = None
         self.stuck = 0
         self.stuckCorner = (0, 0)
 
@@ -71,7 +72,7 @@ class MyBot:
 
         actions = []
 
-        if player.pos == self.old_position:
+        if self.old_player and player.pos == self.old_player.pos:
             self.stuck = game_state.current_tick
             self.find_wall(player.pos, player.dest)
             self.instructions = None
@@ -132,10 +133,10 @@ class MyBot:
                 self.instructions = self.find_path(player.pos, goal)
 
         # Save old players
-        self.old_position = player.pos
         self.old_player = player
+        self.old_ennemy = ennemy
 
-        if self.C_PATHFINDING:
+        if self.C_PATHFINDING and self.instructions:
             position = self.instructions.pop(0)
             print(f'NEXT INSTRUCTION = {position[0]}, {position[1]}')
             actions.append(MoveAction((position[0], position[1])))
@@ -322,7 +323,8 @@ class MyBot:
 
     def on_start(self, map_state: MapState):
         self.__map_state = map_state
-        self.old_position = None
+        self.old_player = None
+        self.old_ennemy = None
         self.wall_map = np.zeros((100, 100), dtype=int)
         self.instructions = None
 
@@ -374,16 +376,19 @@ class MyBot:
     def attack_blade(self, player, ennemy):
         dx = player.pos.x - ennemy.pos.x
         dy = player.pos.y - ennemy.pos.y
-        return RotateBladeAction(math.atan2(dy, dx))
+        return RotateBladeAction(math.atan2(dx, dy))
     
     def attack_gun(self, player, ennemy):
-        distance = [player.pos.x - ennemy.pos.x, player.pos.y - ennemy.pos.y]
-        norm = math.sqrt(distance[0] ** 2 + distance[1] ** 2)
-        direction = [distance[1] / norm, distance[0] / norm]
-        direction = [c * 15 for c in direction]
+        #distance = [player.pos.x - ennemy.pos.x, player.pos.y - ennemy.pos.y]
+        #norm = math.sqrt(distance[0] ** 2 + distance[1] ** 2)
+        #direction = [distance[1] / norm, distance[0] / norm]
+        #direction = [c * 15 for c in direction]
+
+        dx = ennemy.pos.x - self.old_ennemy.pos.x if self.old_ennemy else 0
+        dy = ennemy.pos.y - self.old_ennemy.pos.y if self.old_ennemy else 0
 
         #return ShootAction(direction)
-        return ShootAction((ennemy.pos.x, ennemy.pos.y))
+        return ShootAction((ennemy.pos.x + dx, ennemy.pos.y + dy))
 
 
     def choose_stuck_corner(self, player=None):
