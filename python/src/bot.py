@@ -19,8 +19,8 @@ class MyBot:
     
     def __init__(self):
         self.name = "Bon Matin"
-        self.coinRank = 0
-        self.coinDistance = 10000
+        self.old_position = 0
+        self.C_ALLOW_BLADE = False
 
 
     def on_tick(self, game_state: GameState) -> List[Union[MoveAction, SwitchWeaponAction, RotateBladeAction, ShootAction, SaveAction]]:
@@ -46,7 +46,7 @@ class MyBot:
                                             PlayerWeapon.PlayerWeaponCanon
                                             PlayerWeapon.PlayerWeaponBlade
                                             
-                - BladeRotateAction(rad)    Si vous avez la lame comme arme, vous pouver mettre votre arme
+                - RotateBladeAction(rad)    Si vous avez la lame comme arme, vous pouver mettre votre arme
                                        à la rotation donnée en radian.
         Arguments:
             game_state (GameState): (fr): L'état de la partie.
@@ -71,11 +71,20 @@ class MyBot:
 
         ennemy, ennemyDist = self.find_closest_player(player, game_state.players) 
 
-        if (ennemyDist < 15):
+
+        if ennemyDist <= 2 and self.C_ALLOW_BLADE:
+            if player.playerWeapon != 2:
+                actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade))
+
+            dx = player.pos.x - ennemy.pos.x
+            dy = player.pos.y - ennemy.pos.y
+            actions.append(RotateBladeAction(math.atan2(dy, dx)))
+        elif ennemyDist <= 15:
             if player.playerWeapon != 1:
                 actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponCanon))
 
             actions.append(ShootAction((ennemy.pos.x, ennemy.pos.y)))
+
         
         self.old_position = player.pos
         return actions
@@ -226,8 +235,6 @@ class MyBot:
         """
         self.__map_state = map_state
         self.old_position = 0
-        self.coinRank = 0
-        self.coinDistance = 10000
         pass
 
 

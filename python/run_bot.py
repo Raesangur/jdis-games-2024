@@ -13,7 +13,7 @@ def main():
     if args.rank:
         channel = "wss://jdis-ia.dinf.fsci.usherbrooke.ca:8087/echo"
     
-    token = "31e75973-77d4-4d7d-a3d8-ba8411614a20"
+    token = "c302b6f4-4266-4c3a-b9ec-ea85d3f9175f"
 
     Socket(channel, token).run()
 
