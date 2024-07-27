@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import random
 from queue import Queue
 
 from typing import List, Union
@@ -23,7 +24,7 @@ class MyBot:
         self.C_ALLOW_BLADE = True
         self.C_AGGRESSIVE = True
         self.C_STUCK_ADJUST = True
-        self.C_STUCK_HYSTERESIS = 10
+        self.C_STUCK_HYSTERESIS = 15
         self.C_PATHFINDING = False
 
         self.old_player = None
@@ -86,6 +87,8 @@ class MyBot:
         self.adjust_aggressiveness(game_state)
 
         ennemy, ennemyDist = self.find_closest_player(player, game_state.players)
+        if self.old_ennemy and ennemy.name != self.old_ennemy.name:
+            self.old_ennemy = None
 
         # Attack with Blade
         if ennemyDist <= 2 and self.C_ALLOW_BLADE:
@@ -333,6 +336,8 @@ class MyBot:
             distance = math.dist([player.pos.x, player.pos.y], [p.pos.x, p.pos.y])
             if distance == 0:
                 continue
+            if p.health <= 10 and random.choice([0, 1]):
+                continue
 
             if distance < minDistance:
                 bestPlayer = p
@@ -368,7 +373,7 @@ class MyBot:
         dy = ennemy.pos.y - self.old_ennemy.pos.y if self.old_ennemy else 0
 
         #return ShootAction(direction)
-        return ShootAction((ennemy.pos.x - dx, ennemy.pos.y + dy))
+        return ShootAction((ennemy.pos.x, ennemy.pos.y + dy))
 
 
     def choose_stuck_corner(self, player=None):
