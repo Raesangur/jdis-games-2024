@@ -90,10 +90,44 @@ class MyBot:
         return actions
     
 
+    # def find_instructions():
+
+
+
+    # def breadth_first_search(graph, start_node, end_node):
+    #     solution = []
+    #     costs = 0
+
+    #     frontier = []
+    #     visited = []
+
+    #     frontier.append(start_node)
+    #     visited.append(start_node)
+
+    #     while frontier:
+    #         selected_node = frontier.pop(0)
+
+    #         if selected_node == end_node:
+    #             solution.append(selected_node)
+    #             break
+            
+    #         solution.append(selected_node)
+
+    #         for neighbour in graph[selected_node]:
+    #             if neighbour not in visited:
+    #                 frontier.append(neighbour)
+    #                 visited.append(neighbour)
+
+    #         costs += 1
+
+    #     return solution, costs
+
+
+
     def find_wall(self, position, destination):
         if destination.y < position.y:
             # WALL UP
-            y = position.y - 1
+            y = int(position.y - 1)
             x_temp = position.x
 
             # valeur entre 0 et 19 car il y a 20 cell de 5 unité
@@ -105,15 +139,15 @@ class MyBot:
             x4 = x3+1
             x5 = x4+1
 
-            self.wall_map[x1][y] = 1
-            self.wall_map[x2][y] = 1
-            self.wall_map[x3][y] = 1
-            self.wall_map[x4][y] = 1
-            self.wall_map[x5][y] = 1
+            self.wall_map[int(x1)][y] = 1
+            self.wall_map[int(x2)][y] = 1
+            self.wall_map[int(x3)][y] = 1
+            self.wall_map[int(x4)][y] = 1
+            self.wall_map[int(x5)][y] = 1
 
         elif destination.y > position.y:
             # WALL DOWN
-            y = position.y + 1
+            y = int(position.y + 1)
             x_temp = position.x
 
             # valeur entre 0 et 19 car il y a 20 cell de 5 unité
@@ -125,15 +159,15 @@ class MyBot:
             x4 = x3+1
             x5 = x4+1
 
-            self.wall_map[x1][y] = 1
-            self.wall_map[x2][y] = 1
-            self.wall_map[x3][y] = 1
-            self.wall_map[x4][y] = 1
-            self.wall_map[x5][y] = 1
+            self.wall_map[int(x1)][y] = 1
+            self.wall_map[int(x2)][y] = 1
+            self.wall_map[int(x3)][y] = 1
+            self.wall_map[int(x4)][y] = 1
+            self.wall_map[int(x5)][y] = 1
             
         elif destination.x > position.x:
             # WALL RIGHT
-            x = position.x + 1
+            x = int(position.x + 1)
             y_temp = position.y
 
             # valeur entre 0 et 19 car il y a 20 cell de 5 unité
@@ -145,15 +179,15 @@ class MyBot:
             y4 = y3+1
             y5 = y4+1
 
-            self.wall_map[x][y1] = 1
-            self.wall_map[x][y2] = 1
-            self.wall_map[x][y3] = 1
-            self.wall_map[x][y4] = 1
-            self.wall_map[x][y5] = 1
+            self.wall_map[x][int(y1)] = 1
+            self.wall_map[x][int(y2)] = 1
+            self.wall_map[x][int(y3)] = 1
+            self.wall_map[x][int(y4)] = 1
+            self.wall_map[x][int(y5)] = 1
 
         else:
             # WALL LEFT
-            x = position.x - 1
+            x = int(position.x - 1)
             y_temp = position.y
 
             # valeur entre 0 et 19 car il y a 20 cell de 5 unité
@@ -165,11 +199,11 @@ class MyBot:
             y4 = y3+1
             y5 = y4+1
 
-            self.wall_map[x][y1] = 1
-            self.wall_map[x][y2] = 1
-            self.wall_map[x][y3] = 1
-            self.wall_map[x][y4] = 1
-            self.wall_map[x][y5] = 1
+            self.wall_map[x][int(y1)] = 1
+            self.wall_map[x][int(y2)] = 1
+            self.wall_map[x][int(y3)] = 1
+            self.wall_map[x][int(y4)] = 1
+            self.wall_map[x][int(y5)] = 1
 
 
     # def decompress_octets(self):
@@ -216,7 +250,6 @@ class MyBot:
             dy = 0
 
         return ShootAction(currentPos.x + dx, currentPos.y + dy)
-
 
 
     def on_start(self, map_state: MapState):
