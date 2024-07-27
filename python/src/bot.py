@@ -1,4 +1,5 @@
 import math
+import numpy
 
 from typing import List, Union
 
@@ -55,6 +56,9 @@ class MyBot:
         player = [p for p in players if p.name == "bon-matin"][0]
         print(player.health)
 
+        if player.position == self.old_position:
+            octets = find_wall(player.position, player.destination)
+
         actions = [
             MoveAction((10.0, 11.34)),
             ShootAction((11.2222, 13.547)),
@@ -65,20 +69,110 @@ class MyBot:
         return actions
     
 
-    def find_wall(position, destination, wall_map):
-        # 1- find direction
+    def find_wall(position, destination):
+        wall_map = decompress_octets()
+
         if destination.y < position.y:
-            direction = 'UP'
+            # WALL UP
+            y = position.y - 1
+            x_temp = position.x
+
+            # valeur entre 0 et 19 car il y a 20 cell de 5 unité
+            cell = math.floor(x_temp/5)
+
+            x1 = cell*5
+            x2 = x1+1
+            x3 = x2+1
+            x4 = x3+1
+            x5 = x4+1
+
+            wall_map[x1][y] = 1
+            wall_map[x2][y] = 1
+            wall_map[x3][y] = 1
+            wall_map[x4][y] = 1
+            wall_map[x5][y] = 1
+
+            print(wall_map)
+            return compress_array(wall_map)
+
         elif destination.y > position.y:
-            direction = 'DOWN'
+            # WALL DOWN
+            y = position.y + 1
+            x_temp = position.x
+
+            # valeur entre 0 et 19 car il y a 20 cell de 5 unité
+            cell = math.floor(x_temp/5)
+
+            x1 = cell*5
+            x2 = x1+1
+            x3 = x2+1
+            x4 = x3+1
+            x5 = x4+1
+
+            wall_map[x1][y] = 1
+            wall_map[x2][y] = 1
+            wall_map[x3][y] = 1
+            wall_map[x4][y] = 1
+            wall_map[x5][y] = 1
+
+            print(wall_map)
+            return compress_array(wall_map)
+            
         elif destination.x > position.x:
-            direction = 'RIGHT'
+            # WALL RIGHT
+            x = position.x + 1
+            y_temp = position.y
+
+            # valeur entre 0 et 19 car il y a 20 cell de 5 unité
+            cell = math.floor(y_temp/5)
+
+            y1 = cell*5
+            y2 = y1+1
+            y3 = y2+1
+            y4 = y3+1
+            y5 = y4+1
+
+            wall_map[x][y1] = 1
+            wall_map[x][y2] = 1
+            wall_map[x][y3] = 1
+            wall_map[x][y4] = 1
+            wall_map[x][y5] = 1
+
+            print(wall_map)
+            return compress_array(wall_map)
         else:
-            direction = 'LEFT'
-        
-        # 2- store wall
-        array = [[0] * 100 for _ in range(100)]
-        
+            # WALL LEFT
+            x = position.x - 1
+            y_temp = position.y
+
+            # valeur entre 0 et 19 car il y a 20 cell de 5 unité
+            cell = math.floor(y_temp/5)
+
+            y1 = cell*5
+            y2 = y1+1
+            y3 = y2+1
+            y4 = y3+1
+            y5 = y4+1
+
+            wall_map[x][y1] = 1
+            wall_map[x][y2] = 1
+            wall_map[x][y3] = 1
+            wall_map[x][y4] = 1
+            wall_map[x][y5] = 1
+
+            print(wall_map)
+            return compress_array(wall_map)
+
+
+    def decompress_octets():
+        flat_array = np.unpackbits(self.__map_state.save)
+        return flat_array.reshape((100, 100))
+
+
+    def compress_array(array):
+        flat_array = array.flatten()
+        return np.packbits(flat_array)
+
 
     def on_start(self, map_state: MapState):
         """
