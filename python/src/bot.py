@@ -57,13 +57,18 @@ class MyBot:
             game_state (GameState): (fr): L'état de la partie.
                                 (en): The state of the game.   
         """
-        print("--------------")
         print(f"Current tick: {game_state.current_tick}")
         player = [p for p in game_state.players if p.name == "bon-matin"][0]
         print("Health: " + str(player.health) + "\t Position: " + str(player.pos))
         
-        if False:
+        if True:
             # pathfinding
+            if player.pos == self.old_position:
+                self.find_wall(player.pos, player.dest)
+                self.instructions = None
+                print("Stuck!")
+                print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
+
             if self.instructions is None or len(self.instructions) == 0:
                 coin, coinDistance = self.find_closest_coin(player, game_state.coins)
                 goal = (coin.pos.x, coin.pos.y)
@@ -72,23 +77,22 @@ class MyBot:
             actions = []
             position = self.instructions.pop(0)
             actions.append(MoveAction((position[0], position[1])))
+            self.old_position = player.pos
+            return actions
 
-        if True:
+        if False:
             actions = []
 
             if player.pos == self.old_position:
-                if not self.stuck:
-                    self.stuck = game_state.current_tick
+                self.stuck = game_state.current_tick
                 print("Stuck!")
                 self.find_wall(player.pos, player.dest)
                 print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
                 self.instructions = None
+                self.choose_stuck_corner()
             else:
                 if (game_state.current_tick > self.stuck + self.C_STUCK_HYSTERESIS):
-                    self.choose_stuck_corner()
                     self.stuck = 0
-
-            print("Stuck tick: " + str(self.stuck))
 
             self.adjust_aggressiveness(game_state)
 
@@ -119,8 +123,7 @@ class MyBot:
                     actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
 
                 self.old_position = player.pos
-
-            return actions
+                return actions
 
 
     def find_path(self, position, goal):
@@ -157,6 +160,7 @@ class MyBot:
     def find_wall(self, position, destination):
         if destination.y < position.y:
             # WALL UP
+            print('Wall up')
             y = int(position.y - 1)
             x_temp = position.x
 
@@ -177,6 +181,7 @@ class MyBot:
 
         elif destination.y > position.y:
             # WALL DOWN
+            print('Wall down')
             y = int(position.y + 1)
             x_temp = position.x
 
@@ -196,6 +201,7 @@ class MyBot:
             self.wall_map[int(x5)][y] = 1
             
         elif destination.x > position.x:
+            print('Wall right')
             # WALL RIGHT
             x = int(position.x + 1)
             y_temp = position.y
@@ -217,6 +223,7 @@ class MyBot:
 
         else:
             # WALL LEFT
+            print('Wall left')
             x = int(position.x - 1)
             y_temp = position.y
 
@@ -346,13 +353,13 @@ class MyBot:
     def choose_stuck_corner(self):
         if self.stuckCorner == (0, 0):
             print("Going lower left")
-            self.stuckCorner = (0, 10000)
-        elif self.stuckCorner == (0, 10000):
+            self.stuckCorner = (0, self.__map_state.size)
+        elif self.stuckCorner == (0, self.__map_state.size):
             print("Going lower right")
-            self.stuckCorner = (10000, 10000)
-        elif self.stuckCorner == (10000, 10000):
+            self.stuckCorner = (self.__map_state.size, self.__map_state.size)
+        elif self.stuckCorner == (self.__map_state.size, self.__map_state.size):
             print("Going upper right")
-            self.stuckCorner = (10000, 0)
+            self.stuckCorner = (self.__map_state.size, 0)
         else:
             print("Going upper left")
             self.stuckCorner = (0, 0)
