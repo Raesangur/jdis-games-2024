@@ -61,7 +61,7 @@ class MyBot:
         if player.pos == self.old_position:
             print("Stuck!")
             self.find_wall(player.pos, player.dest)
-            print(self.wall_map)
+            print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
             #octets = self.find_wall(player.pos, player.dest)
 
         if game_state.current_tick % 100 < 50:
@@ -268,13 +268,8 @@ class MyBot:
             map_state (MapState): (fr) L'état de la carte.
         """
         self.__map_state = map_state
-<<<<<<< HEAD
         self.old_position = None
-        pass
-=======
-        self.old_position = 0
         self.wall_map = np.zeros((100, 100), dtype=int)
->>>>>>> 21189122b219bad8257c552bddbd7d3690dc9d82
 
 
     def on_end(self):
