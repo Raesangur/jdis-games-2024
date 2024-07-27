@@ -58,8 +58,8 @@ class MyBot:
 
 
         if player.pos == self.old_position:
-            #octets = self.find_wall(player.pos, player.dest)
-            pass
+            self.find_wall(player.pos, player.dest)
+            print(self.wall_map)
 
         coin = self.find_closest_coin(player, game_state.coins)
 
@@ -82,8 +82,6 @@ class MyBot:
     
 
     def find_wall(self, position, destination):
-        wall_map = self.decompress_octets()
-
         if destination.y < position.y:
             # WALL UP
             y = position.y - 1
@@ -98,14 +96,11 @@ class MyBot:
             x4 = x3+1
             x5 = x4+1
 
-            wall_map[x1][y] = 1
-            wall_map[x2][y] = 1
-            wall_map[x3][y] = 1
-            wall_map[x4][y] = 1
-            wall_map[x5][y] = 1
-
-            print(wall_map)
-            return self.compress_array(wall_map)
+            self.wall_map[x1][y] = 1
+            self.wall_map[x2][y] = 1
+            self.wall_map[x3][y] = 1
+            self.wall_map[x4][y] = 1
+            self.wall_map[x5][y] = 1
 
         elif destination.y > position.y:
             # WALL DOWN
@@ -121,14 +116,11 @@ class MyBot:
             x4 = x3+1
             x5 = x4+1
 
-            wall_map[x1][y] = 1
-            wall_map[x2][y] = 1
-            wall_map[x3][y] = 1
-            wall_map[x4][y] = 1
-            wall_map[x5][y] = 1
-
-            print(wall_map)
-            return self.compress_array(wall_map)
+            self.wall_map[x1][y] = 1
+            self.wall_map[x2][y] = 1
+            self.wall_map[x3][y] = 1
+            self.wall_map[x4][y] = 1
+            self.wall_map[x5][y] = 1
             
         elif destination.x > position.x:
             # WALL RIGHT
@@ -144,14 +136,12 @@ class MyBot:
             y4 = y3+1
             y5 = y4+1
 
-            wall_map[x][y1] = 1
-            wall_map[x][y2] = 1
-            wall_map[x][y3] = 1
-            wall_map[x][y4] = 1
-            wall_map[x][y5] = 1
+            self.wall_map[x][y1] = 1
+            self.wall_map[x][y2] = 1
+            self.wall_map[x][y3] = 1
+            self.wall_map[x][y4] = 1
+            self.wall_map[x][y5] = 1
 
-            print(wall_map)
-            return self.compress_array(wall_map)
         else:
             # WALL LEFT
             x = position.x - 1
@@ -166,24 +156,28 @@ class MyBot:
             y4 = y3+1
             y5 = y4+1
 
-            wall_map[x][y1] = 1
-            wall_map[x][y2] = 1
-            wall_map[x][y3] = 1
-            wall_map[x][y4] = 1
-            wall_map[x][y5] = 1
-
-            print(wall_map)
-            return self.compress_array(wall_map)
+            self.wall_map[x][y1] = 1
+            self.wall_map[x][y2] = 1
+            self.wall_map[x][y3] = 1
+            self.wall_map[x][y4] = 1
+            self.wall_map[x][y5] = 1
 
 
-    def decompress_octets(self):
-        flat_array = np.unpackbits(self.__map_state.save)
-        return flat_array.reshape((100, 100))
+    # def decompress_octets(self):
+    #     flat_array = np.unpackbits(self.__map_state.save)
+        # small_wall_flat_array = flat_array[:400]
+        # small_wall_array = flat_array.reshape((20, 20))
+
+        # big_wall_array = np.zeros((100, 100), dtype=int)
+
+        # for i in range(20):
+        #     for j in range(20):
+        #         if small_wall_array[i][j] == 1:
 
 
-    def compress_array(self, array):
-        flat_array = array.flatten()
-        return np.packbits(flat_array)
+    # def compress_array(self, array):
+    #     flat_array = array.flatten()
+    #     return np.packbits(flat_array)
 
 
     def rotate_blade(angle):
@@ -228,6 +222,7 @@ class MyBot:
         self.old_position = 0
         self.coinRank = 0
         self.coinDistance = 10000
+        self.wall_map = np.zeros((100, 100), dtype=int)
         pass
 
 
