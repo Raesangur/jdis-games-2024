@@ -356,7 +356,7 @@ class MyBot:
     def attack_blade(self, player, ennemy):
         dx = player.pos.x - ennemy.pos.x
         dy = player.pos.y - ennemy.pos.y
-        return RotateBladeAction(math.atan2(dx, dy))
+        return RotateBladeAction(math.atan2(-dx, dy))
     
     def attack_gun(self, player, ennemy):
         #distance = [player.pos.x - ennemy.pos.x, player.pos.y - ennemy.pos.y]
@@ -368,7 +368,7 @@ class MyBot:
         dy = ennemy.pos.y - self.old_ennemy.pos.y if self.old_ennemy else 0
 
         #return ShootAction(direction)
-        return ShootAction((ennemy.pos.x + dx, ennemy.pos.y + dy))
+        return ShootAction((ennemy.pos.x - dx, ennemy.pos.y + dy))
 
 
     def choose_stuck_corner(self, player=None):
