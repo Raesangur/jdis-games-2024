@@ -55,38 +55,35 @@ class MyBot:
         """
         print(f"Current tick: {game_state.current_tick}")
         player = [p for p in game_state.players if p.name == "bon-matin"][0]
-        print(player.health)
-
-
-        if player.pos == self.old_position:
-            print("Stuck!")
-            self.find_wall(player.pos, player.dest)
-            print(self.wall_map)
-            #octets = self.find_wall(player.pos, player.dest)
-
-        if game_state.current_tick % 100 < 50:
-            self.C_AGGRESSIVE = True
-            print("Aggressive Mode")
-        else:
-            self.C_AGGRESSIVE = False
-            print("Discovery Mode")
+        print("Health: " + str(player.health))
 
         actions = []
 
-        ennemy, ennemyDist = self.find_closest_player(player, game_state.players) 
+        if player.pos == self.old_position:
+            print("Stuck!")
+            #self.find_wall(player.pos, player.dest)
+            #print(self.wall_map)
+            #octets = self.find_wall(player.pos, player.dest)
+
+        self.adjust_aggressiveness(game_state)
+
+        ennemy, ennemyDist = self.find_closest_player(player, game_state.players)
+
+        # Attack with Blade
         if ennemyDist <= 2 and self.C_ALLOW_BLADE:
             if player.playerWeapon != 2:
                 actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade))
 
-            dx = player.pos.x - ennemy.pos.x
-            dy = player.pos.y - ennemy.pos.y
-            actions.append(RotateBladeAction(math.atan2(dy, dx)))
+            actions.append(self.attack_blade(player, ennemy))
+
+        # Attack with gun
         elif ennemyDist <= 15:
             if player.playerWeapon != 1:
                 actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponCanon))
 
-            actions.append(ShootAction((ennemy.pos.x, ennemy.pos.y)))
+            actions.append(self.attack_gun(player, ennemy))
 
+        # Move
         if self.C_AGGRESSIVE == False:
             coin = self.find_closest_coin(player, game_state.coins)
             actions.append(MoveAction((coin.pos.x, coin.pos.y)))
@@ -235,13 +232,8 @@ class MyBot:
             map_state (MapState): (fr) L'état de la carte.
         """
         self.__map_state = map_state
-<<<<<<< HEAD
         self.old_position = None
-        pass
-=======
-        self.old_position = 0
         self.wall_map = np.zeros((100, 100), dtype=int)
->>>>>>> 21189122b219bad8257c552bddbd7d3690dc9d82
 
 
     def on_end(self):
@@ -278,3 +270,19 @@ class MyBot:
                 minDistance = distance
 
         return bestPlayer, minDistance
+    
+    def adjust_aggressiveness(self, game_state):
+        if game_state.current_tick % 100 < 50:
+            self.C_AGGRESSIVE = True
+            print("Aggressive Mode")
+        else:
+            self.C_AGGRESSIVE = False
+            print("Discovery Mode")
+
+    def attack_blade(self, player, ennemy):
+        dx = player.pos.x - ennemy.pos.x
+        dy = player.pos.y - ennemy.pos.y
+        return RotateBladeAction(math.atan2(dy, dx))
+    
+    def attack_gun(self, player, ennemy):
+        return ShootAction((ennemy.pos.x, ennemy.pos.y))
