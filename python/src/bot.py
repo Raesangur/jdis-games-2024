@@ -62,7 +62,22 @@ class MyBot:
 
         return actions
     
-    
+
+    def find_wall(position, destination, wall_map):
+        # 1- find direction
+        if destination.y < position.y:
+            direction = 'UP'
+        elif destination.y > position.y:
+            direction = 'DOWN'
+        elif destination.x > position.x:
+            direction = 'RIGHT'
+        else:
+            direction = 'LEFT'
+        
+        # 2- store wall
+        array = [[0] * 100 for _ in range(100)]
+        
+
     def on_start(self, map_state: MapState):
         """
         (fr) Cette méthode est appelée une seule fois au début de la partie. Vous pouvez y définir des
