@@ -57,6 +57,7 @@ class MyBot:
             game_state (GameState): (fr): L'état de la partie.
                                 (en): The state of the game.   
         """
+        print("--------------")
         print(f"Current tick: {game_state.current_tick}")
         player = [p for p in game_state.players if p.name == "bon-matin"][0]
         print("Health: " + str(player.health) + "\t Position: " + str(player.pos))
@@ -76,15 +77,18 @@ class MyBot:
             actions = []
 
             if player.pos == self.old_position:
-                self.stuck = game_state.current_tick
+                if not self.stuck:
+                    self.stuck = game_state.current_tick
                 print("Stuck!")
                 self.find_wall(player.pos, player.dest)
                 print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
                 self.instructions = None
-                self.choose_stuck_corner()
             else:
                 if (game_state.current_tick > self.stuck + self.C_STUCK_HYSTERESIS):
+                    self.choose_stuck_corner()
                     self.stuck = 0
+
+            print("Stuck tick: " + str(self.stuck))
 
             self.adjust_aggressiveness(game_state)
 
@@ -115,7 +119,8 @@ class MyBot:
                     actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
 
                 self.old_position = player.pos
-                return actions
+
+            return actions
 
 
     def find_path(self, position, goal):
@@ -341,13 +346,13 @@ class MyBot:
     def choose_stuck_corner(self):
         if self.stuckCorner == (0, 0):
             print("Going lower left")
-            self.stuckCorner = (0, self.__map_state.size)
-        elif self.stuckCorner == (0, self.__map_state.size):
+            self.stuckCorner = (0, 10000)
+        elif self.stuckCorner == (0, 10000):
             print("Going lower right")
-            self.stuckCorner = (self.__map_state.size, self.__map_state.size)
-        elif self.stuckCorner == (self.__map_state.size, self.__map_state.size):
+            self.stuckCorner = (10000, 10000)
+        elif self.stuckCorner == (10000, 10000):
             print("Going upper right")
-            self.stuckCorner = (self.__map_state.size, 0)
+            self.stuckCorner = (10000, 0)
         else:
             print("Going upper left")
             self.stuckCorner = (0, 0)
