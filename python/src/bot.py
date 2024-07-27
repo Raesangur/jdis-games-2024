@@ -129,6 +129,7 @@ class MyBot:
         self.old_player = player
 
         if self.C_PATHFINDING:
+            print('NEXT INSTRUCTION')
             position = self.instructions.pop(0)
             actions.append(MoveAction((position[0], position[1])))
 
