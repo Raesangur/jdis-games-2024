@@ -75,11 +75,17 @@ class MyBot:
 
         if self.old_player and player.pos == self.old_player.pos:
             self.stuck = game_state.current_tick
-            print("Stuck!")
             self.find_wall(player.pos, player.dest)
-            print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
             self.instructions = None
             self.choose_stuck_corner()
+
+            print("STUCK!")
+            print(f"LISTE DE MUR : ")
+            for i in range(len(self.wall_map)):
+                for j in range(len(self.wall_map)):
+                    if self.wall_map[i][j] == 1:
+                        print(f"Wall à : {i}, {j}")
+
         else:
             if (game_state.current_tick > self.stuck + self.C_STUCK_HYSTERESIS):
                 self.stuck = 0
@@ -134,10 +140,11 @@ class MyBot:
         self.old_ennemy = ennemy
 
         if self.C_PATHFINDING and self.instructions:
-            print('NEXT INSTRUCTION')
             position = self.instructions.pop(0)
+            print(f'NEXT INSTRUCTION = {position[0]}, {position[1]}')
             actions.append(MoveAction((position[0], position[1])))
 
+        print(F"NOMBRE DE MUR {np.sum(self.wall_map)/5}")
         return actions
 
 
@@ -162,8 +169,16 @@ class MyBot:
 
             for dx, dy in directions:
                 next_node = (node[0]+dx, node[1]+dy)
+                # print(f'Node : {next_node[0]}, {next_node[1]}')
+
+                # if maze[next_node] == 1:
+                    # print(f'==================Node identifié comme mur : {next_node}')
+
                 if (next_node == end):
                     print('CHEMIN DE PATHFINDING TROUVÉ')
+                    if maze[next_node] == 1:
+                        print('LE GOAL EST UN MUR')
+                    print(path + [next_node])
                     return path + [next_node]
                 if (next_node[0] >= 0 and next_node[1] >= 0 and
                     next_node[0] < maze.shape[0] and next_node[1] < maze.shape[1] and
@@ -173,6 +188,11 @@ class MyBot:
 
 
     def find_wall(self, position, destination):
+        position.x = int(position.x)
+        position.y = int(position.y)
+        destination.x = int(destination.x)
+        destination.y = int(destination.y)
+
         if destination.y < position.y:
             # WALL UP
             print('Wall up')
