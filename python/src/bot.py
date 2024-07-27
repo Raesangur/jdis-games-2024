@@ -10,9 +10,6 @@ class MyBot:
     """
     (fr) Cette classe représente votre bot. Vous pouvez y définir des attributs et des méthodes qui 
         seront conservées entre chaque appel de la méthode `on_tick`.
-
-    (en) This class represents your bot. You can define attributes and methods in it that will be kept 
-        between each call of the `on_tick` method.
     """
     __map_state: MapState
     name : str
@@ -46,40 +43,23 @@ class MyBot:
                                             
                 - BladeRotateAction(rad)    Si vous avez la lame comme arme, vous pouver mettre votre arme
                                        à la rotation donnée en radian.
-
-        (en)    This method is called at each game tick. You can define your bot's behavior here. It must return a 
-                list of actions that will be executed by the server.
-
-                Possible actions:
-                - MoveAction((x, y))       Directs your bot to move to the specified point at a constant speed.
-
-                - ShootAction((x, y))      If you have the gun equipped, it will shoot at the given coordinates.
-
-                - SaveAction([...])        Allows you to store 100 bytes on the server. When you reconnect, these 
-                                       data will be provided to you by the server.
-
-                - SwitchWeaponAction(id)    Allows you to change your weapon. By default, your bot is unarmed. Here 
-                                       are your choices:
-                                        PlayerWeapon.PlayerWeaponNone
-                                        PlayerWeapon.PlayerWeaponCanon
-                                        PlayerWeapon.PlayerWeaponBlade
-                
-                - BladeRotateAction(rad)    if you have the blade as a weapon, you can set your
-                                       weapon to the given rotation in radians.
-
         Arguments:
             game_state (GameState): (fr): L'état de la partie.
                                 (en): The state of the game.   
         """
         print(f"Current tick: {game_state.current_tick}")
+        players = [p for p in game_state.players]
+        print(players)
+        player = [p for p in players if p.name == "bon-matin"][0]
+        print(player.health)
 
         actions = [
             MoveAction((10.0, 11.34)),
             ShootAction((11.2222, 13.547)),
             SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade),
-            SaveAction(b"Hello World"),
+            SaveAction(b"Bon Matin"),
         ]
-                
+
         return actions
     
     
@@ -88,12 +68,8 @@ class MyBot:
         (fr) Cette méthode est appelée une seule fois au début de la partie. Vous pouvez y définir des
             actions à effectuer au début de la partie.
 
-        (en) This method is called once at the beginning of the game. You can define actions to be 
-            performed at the beginning of the game.
-
         Arguments:
             map_state (MapState): (fr) L'état de la carte.
-                            (en) The state of the map.
         """
         self.__map_state = map_state
         pass
@@ -103,9 +79,12 @@ class MyBot:
         """
         (fr) Cette méthode est appelée une seule fois à la fin de la partie. Vous pouvez y définir des
             actions à effectuer à la fin de la partie.
-
-        (en) This method is called once at the end of the game. You can define actions to be performed 
-            at the end of the game.
         """
         pass
-       
+
+
+
+
+    def blade_position(angle):
+        if angle == "UP":
+            pass
