@@ -1,5 +1,5 @@
 import math
-import numpy
+import numpy as np
 
 from typing import List, Union
 
@@ -57,8 +57,9 @@ class MyBot:
         print(player.health)
 
 
-        if player.position == self.old_position:
-            octets = find_wall(player.position, player.destination)
+        if player.pos == self.old_position:
+            #octets = self.find_wall(player.pos, player.dest)
+            pass
 
         coin = self.find_closest_coin(player, game_state.coins)
 
@@ -76,11 +77,12 @@ class MyBot:
 
             actions.append(ShootAction((ennemy.pos.x, ennemy.pos.y)))
         
+        self.old_position = player.pos
         return actions
     
 
-    def find_wall(position, destination):
-        wall_map = decompress_octets()
+    def find_wall(self, position, destination):
+        wall_map = self.decompress_octets()
 
         if destination.y < position.y:
             # WALL UP
@@ -103,7 +105,7 @@ class MyBot:
             wall_map[x5][y] = 1
 
             print(wall_map)
-            return compress_array(wall_map)
+            return self.compress_array(wall_map)
 
         elif destination.y > position.y:
             # WALL DOWN
@@ -126,7 +128,7 @@ class MyBot:
             wall_map[x5][y] = 1
 
             print(wall_map)
-            return compress_array(wall_map)
+            return self.compress_array(wall_map)
             
         elif destination.x > position.x:
             # WALL RIGHT
@@ -149,7 +151,7 @@ class MyBot:
             wall_map[x][y5] = 1
 
             print(wall_map)
-            return compress_array(wall_map)
+            return self.compress_array(wall_map)
         else:
             # WALL LEFT
             x = position.x - 1
@@ -171,15 +173,15 @@ class MyBot:
             wall_map[x][y5] = 1
 
             print(wall_map)
-            return compress_array(wall_map)
+            return self.compress_array(wall_map)
 
 
-    def decompress_octets():
+    def decompress_octets(self):
         flat_array = np.unpackbits(self.__map_state.save)
         return flat_array.reshape((100, 100))
 
 
-    def compress_array(array):
+    def compress_array(self, array):
         flat_array = array.flatten()
         return np.packbits(flat_array)
 
