@@ -1,3 +1,5 @@
+import math
+
 from typing import List, Union
 
 from core.action import MoveAction, ShootAction, RotateBladeAction, SwitchWeaponAction, SaveAction
@@ -101,6 +103,30 @@ class MyBot:
 
 
 
-    def blade_position(angle):
+    def rotate_blade(angle):
         if angle == "UP":
-            pass
+            return RotateBladeAction(math.pi / 2)
+        if angle == "RIGHT":
+            return RotateBladeAction(0)
+        if angle == "LEFT":
+            return RotateBladeAction(math.pi)
+        else:
+            return RotateBladeAction(math.pi / -2)
+
+    def shoot_cannon(currentPos, angle, distance = 15):
+        dx = 0
+        dy = 0
+        if angle == "UP":
+            dx = 0
+            dy = distance
+        if angle == "DOWN":
+            dx = 0
+            dy = -distance
+        if angle == "RIGHT":
+            dx = distance
+            dy = 0
+        if angle == "LEFT":
+            dx = -distance
+            dy = 0
+
+        return ShootAction(currentPos.x + dx, currentPos.y + dy)
