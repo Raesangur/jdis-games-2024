@@ -72,6 +72,7 @@ class MyBot:
             map_state (MapState): (fr) L'état de la carte.
         """
         self.__map_state = map_state
+        self.old_position = 0
         pass
 
 
