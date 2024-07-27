@@ -24,8 +24,9 @@ class MyBot:
         self.old_player = None
         self.C_ALLOW_BLADE = False
         self.C_AGGRESSIVE = True
-        self.C_STUCK_ADJUST = False
+        self.C_STUCK_ADJUST = True
         self.C_STUCK_HYSTERESIS = 5
+        self.C_PATHFINDING = False
         self.stuck = 0
         self.stuckCorner = (0, 0)
 
@@ -63,65 +64,74 @@ class MyBot:
         player = [p for p in game_state.players if p.name == "bon-matin"][0]
         print("Health: " + str(player.health) + "\t Position: " + str(player.pos))
         
+        # Check if respawning
         if self.old_player and player.health > self.old_player.health:
             print("---- NEW LIFE ----")
             self.stuck = 0
 
-        if True:
-            actions = []
+        actions = []
 
-            if player.pos == self.old_position:
-                self.stuck = game_state.current_tick
-                print("Stuck!")
-                self.find_wall(player.pos, player.dest)
-                print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
-                self.instructions = None
-                self.choose_stuck_corner()
-            else:
-                if (game_state.current_tick > self.stuck + self.C_STUCK_HYSTERESIS):
-                    self.stuck = 0
+        if player.pos == self.old_position:
+            self.stuck = game_state.current_tick
+            print("Stuck!")
+            self.find_wall(player.pos, player.dest)
+            print(f"Nombre de murs trouvés: {np.sum(self.wall_map)/5}")
+            self.instructions = None
+            self.choose_stuck_corner()
+        else:
+            if (game_state.current_tick > self.stuck + self.C_STUCK_HYSTERESIS):
+                self.stuck = 0
 
-            self.adjust_aggressiveness(game_state)
+        self.adjust_aggressiveness(game_state)
 
-            ennemy, ennemyDist = self.find_closest_player(player, game_state.players)
+        ennemy, ennemyDist = self.find_closest_player(player, game_state.players)
 
-            # Attack with Blade
-            if ennemyDist <= 2 and self.C_ALLOW_BLADE:
-                if player.playerWeapon != 2:
-                    actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade))
+        # Attack with Blade
+        if ennemyDist <= 2 and self.C_ALLOW_BLADE:
+            if player.playerWeapon != 2:
+                actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponBlade))
 
-                actions.append(self.attack_blade(player, ennemy))
+            actions.append(self.attack_blade(player, ennemy))
 
-            # Attack with gun
-            elif ennemyDist <= 20:
-                if player.playerWeapon != 1:
-                    actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponCanon))
+        # Attack with gun
+        elif ennemyDist <= 20:
+            if player.playerWeapon != 1:
+                actions.append(SwitchWeaponAction(PlayerWeapon.PlayerWeaponCanon))
 
-                actions.append(self.attack_gun(player, ennemy))
+            actions.append(self.attack_gun(player, ennemy))
 
-            # Move
-            if self.instructions == None or len(self.instructions) == 0:
-                if self.stuck and self.C_STUCK_ADJUST:
+        # Move
+        if self.instructions == None or len(self.instructions) == 0:
+            if self.stuck and self.C_STUCK_ADJUST:
+                if self.C_PATHFINDING:
                     goal = self.stuckCorner
-                    #actions.append(MoveAction(self.stuckCorner))
                 else:
-                    coin, coinDistance = self.find_closest_coin(player, game_state.coins)
-                    if self.C_AGGRESSIVE == False or coinDistance < 5:
+                    actions.append(MoveAction(self.stuckCorner))
+            else:
+                coin, coinDistance = self.find_closest_coin(player, game_state.coins)
+                if self.C_AGGRESSIVE == False or coinDistance < 5:
+                    if self.C_PATHFINDING:
                         goal = (coin.pos.x, coin.pos.y)
-                        #actions.append(MoveAction((coin.pos.x, coin.pos.y)))
                     else:
+                        actions.append(MoveAction((coin.pos.x, coin.pos.y)))
+                else:
+                    if self.C_PATHFINDING:
                         goal = (ennemy.pos.x, ennemy.pos.y)
-                        #actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
+                    else:
+                        actions.append(MoveAction((ennemy.pos.x, ennemy.pos.y)))
 
+            if self.C_PATHFINDING:
                 self.instructions = self.find_path(player.pos, goal)
 
-            self.old_position = player.pos
-            self.old_player = player
+        # Save old players
+        self.old_position = player.pos
+        self.old_player = player
 
+        if self.C_PATHFINDING:
             position = self.instructions.pop(0)
             actions.append(MoveAction((position[0], position[1])))
 
-            return actions
+        return actions
 
 
     def find_path(self, position, goal):
